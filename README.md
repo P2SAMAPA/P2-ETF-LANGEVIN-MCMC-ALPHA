@@ -1,33 +1,26 @@
-# P2-ETF-LANGEVIN-MCMC-ALPHA
+# Langevin MCMC Alpha – Bayesian Portfolio Optimisation
 
-Welcome to the P2-ETF-LANGEVIN-MCMC-ALPHA repository!
+Stochastic Gradient Langevin Dynamics (SGLD) for Bayesian ETF portfolio weights.  
+Posterior mean weights are computed daily and uploaded to Hugging Face Hub.
 
-## Description
+## Features
+- SGLD sampler with temperature control (T→0 gives MAP, T>0 gives uncertainty)
+- Walk‑forward backtest (daily weights, monthly rebalancing)
+- Automated daily runs via GitHub Actions
+- Streamlit dashboard to visualise weights over time
 
-This project focuses on ETF (Exchange-Traded Fund) analysis using Langevin MCMC (Markov Chain Monte Carlo) methods.
+## Setup
 
-## Getting Started
+1. Clone the repo.
+2. Install dependencies: `pip install -r requirements.txt`
+3. Set your `HF_TOKEN` environment variable or GitHub secret.
+4. Run backtest locally: `python run_backtest.py`
+5. Launch dashboard: `streamlit run app.py`
 
-To get started with this project, follow these steps:
+## Configuration
 
-1. Clone the repository
-2. Install dependencies
-3. Explore the project structure and documentation
+Edit `config.py` to change universe, SGLD hyperparameters, or backtest settings.
 
-## Project Structure
+## Results
 
-- Documentation and guides will be added here
-- Code files and modules will be organized by functionality
-- Tests and examples will be included
-
-## Contributing
-
-Feel free to add files and contribute to this project.
-
-## License
-
-[Add your license information here]
-
-## Contact
-
-For questions or inquiries, please reach out to the repository maintainer.
+Posterior weights are stored in `P2SAMAPA/p2-etf-langevin-mcmc-alpha-results` as Parquet files.
