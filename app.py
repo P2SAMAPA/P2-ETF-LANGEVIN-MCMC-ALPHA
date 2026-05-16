@@ -25,7 +25,8 @@ def get_latest_run_folder():
         if not run_folders:
             return None
         return sorted(run_folders, reverse=True)[0]
-    except:
+    except Exception as e:
+        st.warning(f"Could not list repo files: {e}")
         return None
 
 @st.cache_data
@@ -46,26 +47,39 @@ def load_weights(run_folder):
 
 def main():
     st.sidebar.header("Configuration")
-    universe = st.sidebar.selectbox("Select Universe", list(UNIVERSES.keys()), index=0)
-    tickers = UNIVERSES[universe]
+    # Default to the universe that was used for backtest
+    universe_options = list(UNIVERSES.keys())
+    default_index = universe_options.index(ACTIVE_UNIVERSE) if ACTIVE_UNIVERSE in universe_options else 0
+    selected_universe = st.sidebar.selectbox(
+        "Select Universe",
+        universe_options,
+        index=default_index
+    )
+    tickers = UNIVERSES[selected_universe]
     
     latest_run = get_latest_run_folder()
     if latest_run is None:
-        st.info("No results found. Run the backtest first.")
-        return
+        st.info("No results found. Run the backtest first (GitHub Actions or locally).")
+        st.stop()
     
     weights_df = load_weights(latest_run)
     if weights_df is None:
-        st.info("No weight data available.")
-        return
+        st.info("No weight data available in the latest run.")
+        st.stop()
     
-    # Keep only tickers that exist in the results
+    # Filter tickers that exist in the results
     available_tickers = [t for t in tickers if t in weights_df.columns]
     if not available_tickers:
-        st.error("No matching tickers in results.")
-        return
+        st.error(f"No matching tickers between selected universe `{selected_universe}` and the results file.\n"
+                 f"Expected tickers: {tickers[:5]}...\n"
+                 f"Found in results: {list(weights_df.columns)[:5]}...\n"
+                 f"Please select the universe that matches the backtest run (likely `{ACTIVE_UNIVERSE}`).")
+        st.stop()
     
     weights_subset = weights_df[available_tickers]
+    
+    # Show which run we're viewing
+    st.caption(f"Viewing results from run: `{latest_run}` | Universe: `{selected_universe}` | {len(available_tickers)} assets")
     
     # Plot portfolio weights over time
     fig = go.Figure()
