@@ -1,0 +1,26 @@
+name: Run SGLD Backtest
+
+on:
+  schedule:
+    # Run daily at 20:00 UTC (weekdays only)
+    - cron: '0 23 * * 1-5'
+  workflow_dispatch:   # Manual trigger
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run backtest
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python run_backtest.py
+      - name: Upload results to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: python results_uploader.py   # already called inside run_backtest, but safe to keep
