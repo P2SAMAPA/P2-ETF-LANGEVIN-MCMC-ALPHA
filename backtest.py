@@ -10,8 +10,7 @@ def run_backtest():
     returns = dm.returns
     dates = returns.index
     
-    portfolio_weights = []
-    trade_dates = []
+    results = []  # list of dicts with date and ticker weights
     current_weights = None
     
     for i in range(TRAIN_WINDOW, len(dates), REBALANCE_FREQ):
@@ -22,13 +21,19 @@ def run_backtest():
         if len(train_returns) < 100:
             continue
         
-        # Optimise
         posterior_mean, _, _ = optimize_portfolio(train_returns, initial_weights=current_weights)
-        # Normalise to sum = 1
+        # Normalise to sum = 1 (ensures long-only, no leverage)
         new_weights = posterior_mean / np.sum(posterior_mean)
         
-        trade_dates.append(dates[i])
-        portfolio_weights.append(new_weights)
+        # Build dictionary with ticker symbols as keys
+        row = {'date': dates[i]}
+        for ticker, w in zip(tickers, new_weights):
+            row[ticker] = w
+        results.append(row)
         current_weights = new_weights
     
-    return trade_dates, portfolio_weights
+    if not results:
+        return pd.DataFrame()
+    
+    df = pd.DataFrame(results).set_index('date')
+    return df
