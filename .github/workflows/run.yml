@@ -3,7 +3,7 @@ name: Run SGLD Backtest
 on:
   schedule:
     # Run daily at 20:00 UTC (weekdays only)
-    - cron: '0 00 * * 1-6'
+    - cron: '40 00 * * 1-6'
   workflow_dispatch:   # Manual trigger
 
 jobs:
